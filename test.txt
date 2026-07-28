@@ -1,0 +1,7 @@
+Hey World Async28Hey There
+Hey There
+Hey There
+function now() { [native code] } Hey There
+1785242349173 Hey There
+1785242412437 Hey There
+1785242413317 Hey There
