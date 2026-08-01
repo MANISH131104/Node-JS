@@ -1,65 +1,27 @@
 const express = require("express");
-const fs = require("fs")
-const users = require("./MOCK_DATA.json");
+const {connectMongoDB} = require("./connection")
+
+const {logReqRes} = require('./middleWares')
+
+const userRouter = require('./routes/user')
+
+
+const { type } = require("os");
 
 const app = express();
 const PORT = 8000;
 
+// Connection
+connectMongoDB('mongodb://127.0.0.1:27017/youtube-app-1').then(() => 
+    console.log("MongoDB Connected")
+);
+
 // Middleware - PlugIn
 app.use(express.urlencoded({extended: false}));
-
-app.use((req,res,next) => {
-    fs.appendFile('log.txt', `${Date.now()}: ${req.ip} ${req.method}: ${req.path}\n`,(err,data) => {
-        next();
-    })
-});
-
+app.use(logReqRes('log.txt'));
 
 // Routes
-app.get("/users", (req, res) => {
-    const html = `
-    <ul>
-        ${users.map(user => `<li>${user.first_name}</li>`).join("")}
-    </ul>
-    `;
-    res.send(html);
-});
-
-// REST API
-app.get("/api/users", (req, res) => {
-   res.setHeader("X-MyName", "Manish Kumar");     // Custom header
-   // Always add X to custom Headers
-    res.json(users);
-});
-
-app
-.route("/api/users/:id")
-.get((req,res) => {
-    const id = Number(req.params.id);
-    const user = users.find(user => user.id === id);
-    if(!user) return res.status(404).json({erroe: ' user not found'})
-    return res.json(user);
-})
-.patch((req,res) => {
-    // Edit user with id
-    return res.json({status: pending})
-})
-.delete((req,res) => {
-    // Delete user with id
-    return res.json({status: pending})
-});
-
-app.post('/api/users', (req,res) => {
-    // TODO : Create new user
-    const body = req.body;
-    if(!body || !body.first_name || !body.last_name || !body.email || !body.gender || !body.Job_Title){
-        return res.status(400).json({msg: 'All fields are required'})
-    }
-    users.push({...body, id: users.length + 1});
-    fs.writeFile('./MOCK_DATA.json', JSON.stringify(users), (err,data) => {
-        return res.status(201).json({status: 'success', id: users.length});
-    })
-});
+app.use("/api/users", userRouter);
 
 app.listen(PORT, () => {
     console.log(`Server Started at PORT: ${PORT}`);

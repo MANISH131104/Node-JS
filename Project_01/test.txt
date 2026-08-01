@@ -1,0 +1,5 @@
+// DataBase
+
+Schema - Define the Structure
+   Schema - Model
+   Using Model we do CRUD Operation
